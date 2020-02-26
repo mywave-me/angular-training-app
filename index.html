@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html ng-app="mywaveDemoApp">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+    <script src="mywaveAiJsSdk.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div ng-controller="StatusController as status">
+        <div class="my-3">
+          <div
+            class="alert alert-{{alert.type}}"
+            ng-repeat="alert in status.statusList"
+          >
+            {{alert.message}}
+
+            <button
+              type="button"
+              class="close"
+              aria-label="Close"
+              ng-click="status.remove(alert)"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <h1 class="mt-5">MyWave AI SDK AngularJS Training app</h1>
+
+      <div class="bg-light p-3">
+      <div ng-controller="MainController as main">
+        <p> <button ng-click="main.createAccount()" class="btn btn-secondary mr-3">
+          Create Account
+        </button> Account: {{main.account.getId() || 'N/A'}}</p>
+      </div>
+      <hr />
+      <div>
+        <h3>New Conversation</h3>
+        <div ng-controller="NewConversationController as newConversation">
+          <div>
+            <form
+              class="input-group"
+              class="form"
+              ng-submit="newConversation.start(intent)"
+            >
+              <input
+                class="form-control"
+                type="text"
+                ng-model="intent"
+                size="30"
+                placeholder="Let's start aconversation"
+              />
+              <div class="input-group-append">
+                <button class="btn btn-primary">Start</button>
+              </div>
+            </form>
+            <div class="text-center">
+              <p ng-if="newConversation.sampleQuestions.length === 0">
+                <button
+                  class="btn btn-link"
+                  ng-click="newConversation.getSampleQuestions()"
+                >
+                  sample questions
+                </button>
+              </p>
+              <p
+                class="mb-0"
+                ng-repeat="question in newConversation.sampleQuestions"
+              >
+                <button
+                  class="btn btn-link"
+                  ng-click="newConversation.start(question)"
+                >
+                  {{question}}
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <div
+        class="row mt-3 p-3"
+        ng-controller="ConversationsController as conversationList"
+      >
+        <div class="col-3">
+          <h3>Conversations</h3>
+          <div>
+            <p>
+              {{conversationList.data.summaries.length || 0}}
+              conversations
+            </p>
+            <div class="list-group mb-3">
+              <a
+                class="list-group-item"
+                href=""
+                ng-repeat="summary in conversationList.data.summaries"
+                ng-repeat="summary in conversationList.conversations.summaries"
+                ng-click="conversationList.getConversation(summary.getId())"
+                ng-class="{'bg-light': (conversationList.data.current.getId() === summary.getId())}"
+                >{{summary.getIntent()}} 
+                </a>
+            </div>
+            <p>
+              <button
+                ng-click="conversationList.getConversations()"
+                class="btn btn-secondary"
+              >
+                Get Conversations
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <div class="col-9">
+          <h3>Current Conversation</h3>
+          <ul>
+            <li
+              ng-repeat="interaction in conversationList.data.current.getInteractions()" ng-class="{'text-muted': interaction.isResponded()}"
+            >
+              <label>
+                {{interaction.getPrompt()}}
+              </label>
+              <div
+                ng-if="!conversationList.data.current.isEnded() && interaction.getId() !== conversationList.data.current.getCurrentInteraction().getId()"
+              >
+                <ul ng-repeat="(key, field) in interaction.getFields()">
+                  <li>{{field.getAnswer()}}</li>
+                </ul>
+              </div>
+              <div
+                ng-if="!conversationList.data.current.isEnded() && interaction.getId() == conversationList.data.current.getCurrentInteraction().getId()"
+              >
+                <form ng-if="interaction.getType() !== 'confirmDetails'">
+                  <ul>
+                    <li
+                      ng-repeat="field in conversationList.data.current.getCurrentInteraction().getFields()"
+                    >
+                      <div
+                        class="card card-body"
+                        ng-if="field.getType() == 'multipleChoicesWithOther' || field.getType() == 'multipleChoices'"
+                      >
+                        <div class="form-check">
+                          <p ng-repeat="label in field.getChoices()">
+                            <label>
+                              <input
+                                class="form-check-input"
+                                ng-checked="label === field.getAnswer()"
+                                ng-click="conversationList.chooseAnswer(field, label)"
+                                type="radio"
+                              />
+                              {{label}}
+                            </label>
+                          </p>
+
+                          <div
+                            class="form-group"
+                            ng-if="field.getType() == 'multipleChoicesWithOther'"
+                          >
+                            <label>
+                              or:
+                              {{field.getOtherOptionLabel()}}</label
+                            >
+                            <input
+                              type="text"
+                              class="form-control"
+                              ng-model="textInput"
+                              ng-change="conversationList.enterOther(field, textInput)"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-group" ng-if="field.getType() == 'text'">
+                        <input
+                          id="{{field.getId()}}"
+                          class="form-control"
+                          ng-model="textInput"
+                          placeholder="{{field.getHint()}}"
+                          ng-change="{{conversationList.enterText(field, textInput)}}"
+                        />
+                      </div>
+
+                      <div class="form-group" ng-if="field.getType() == 'number'">
+                        <div class="input-group">
+                          <input
+                            class="form-control"
+                            ng-model="textInput"
+                            placeholder="{{field.getHint()}}"
+                            ng-change="conversationList.enterNumber(field, textInput)"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group" ng-if="field.getType() == 'currency'">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <div class="input-group-text">$</div>
+                          </div>
+                          <input
+                            class="form-control"
+                            ng-model="textInput"
+                            placeholder="{{field.getHint()}}"
+                            ng-change="conversationList.enterCurrency(field, textInput)"
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        ng-if="field.getType() == 'multipleChoicesWithRichContent'"
+                        ng-init="conversationList.getRichContentChoices(field)"
+                      >
+                        <table class="table table-bordered">
+                          <tr ng-repeat="choice in conversationList.richContent">
+                            <td>
+                              <input
+                                name="chooseoffer"
+                                type="radio"
+                                ng-click="conversationList.chooseRichContent(field, $index)"
+                              />
+                            </td>
+                            <td>
+                              <h4>{{choice.title}}</h4>
+                              <div>{{choice.description}}</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <div
+                    ng-if="conversationList.data.validationMessage"
+                    class="text-danger"
+                  >
+                    {{conversationList.data.validationMessage}}
+                  </div>
+
+                  <p ng-if="conversationList.data.current.canContinue()" class="mt-3">
+                    <button
+                      class="btn btn-primary"
+                      ng-click="conversationList.submitAnswers()"
+                    >
+                      Submit Answer
+                    </button>
+                  </p>
+                </form>
+
+                <form
+                  class="form-check"
+                  ng-if="interaction.getType() == 'confirmDetails'"
+                  ng-init="conversationList.confirmAll(interaction)"
+                >
+                  <table class="table table-bordered">
+                    <tr ng-repeat="(key, field) in interaction.getFields()">
+                      <td>
+                        <input
+                          type="checkbox"
+                          ng-checked="interaction.getAnswers()[field.getId()] === false"
+                          class="btn btn-sm btn-secondary"
+                          ng-click="conversationList.toggleConfirm(field)"
+                        />
+                      </td>
+                      <td>{{field.getDescription()}}</td>
+                      <td style="width: 90%">
+                        {{field.getLabel()}}
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p>
+                    <button
+                      class="btn btn-primary"
+                      ng-click="conversationList.submitAnswer()"
+                    >
+                      {{conversationList.isAllGood() ? 'All good': 'Change
+                      seleted detail'}}
+                    </button>
+                  </p>
+                </form>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
