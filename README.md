@@ -1,6 +1,6 @@
 # Training App
 
-The Training App is for use during MyWave Ai JS SDK training. The Training App is targeted at Angular 1.7 developers. During training we will be doing exercises using the Trianing App. 
+The Training App is for use during MyWave Ai JS SDK training. The Training App is targeted at Angular 1.7 developers. During training we will be doing exercises using the Training App. 
 
 The Training App is a simple partial implementation of a UI using the JS SDK. It is not intended to be production ready. 
 
