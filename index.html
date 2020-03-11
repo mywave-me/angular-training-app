@@ -188,10 +188,9 @@
                         </div>
                       </div>
 
-
-                      <div
+                    <div
                       class="card card-body"
-                      ng-if="field.getType() == 'multiSelectChoices'
+                      ng-if="field.getType() == 'multiSelectChoices'"
                     >
                       <div class="form-check">
                         <p ng-repeat="label in field.getChoices()">
@@ -205,8 +204,8 @@
                             {{label}}
                           </label>
                         </p>
-                      </div>                      
-                    </div>                      
+                      </div>
+                    </div>                       
 
                       <div class="form-group" ng-if="field.getType() == 'text'">
                         <input
@@ -267,8 +266,13 @@
                               />
                             </td>
                             <td>
+                              {{choice}}
                               <h4>{{choice.title}}</h4>
                               <div>{{choice.description}}</div>
+                              <p>{{choice.price}}</p>
+                            </td>
+                            <td>
+                              <img src="{{choice.imageUrl}}" alt="{{choice.userFriendlyLabel}}" />
                             </td>
                           </tr>
                         </table>
