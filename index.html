@@ -145,14 +145,10 @@
                 ng-if="!conversationList.data.current.isEnded() && interaction.getId() == conversationList.data.current.getCurrentInteraction().getId()"
               >
                 <form ng-if="interaction.getType() !== 'confirmDetails'">
-
-
                   <ul>
                     <li
                       ng-repeat="field in conversationList.data.current.getCurrentInteraction().getFields()"
                     >
-                    <p>Field type: {{field.getType()}} <br />
-                      Field description: {{field.getDescription()}} </p>
                       <div
                         class="card card-body"
                         ng-if="field.getType() == 'multipleChoicesWithOther' || field.getType() == 'multipleChoices'"
@@ -266,7 +262,6 @@
                               />
                             </td>
                             <td>
-                              {{choice}}
                               <h4>{{choice.title}}</h4>
                               <div>{{choice.description}}</div>
                               <p>{{choice.price}}</p>
