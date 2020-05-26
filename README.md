@@ -28,8 +28,8 @@ Confirm: Live agent required?
 
 Category - Conversation
 Action - Start, Interaction, Answered, End
-Label (optional, but recommended) - Conversation name
-Value (optional) - Question / Prompt
+Label (optional, but recommended) - Question / Prompt
+Value (optional) - a non-negative integer that will appear as the event value
 
 
 

@@ -35,15 +35,9 @@ angular
               $rootScope.$apply();
             });
 
-            console.log('START: ', {
-                'event_category': 'conversation',
-                'event_label': intent,
-                'value': ''
-              })
-            gtag('event', 'start', {
+            gtag('event', 'start conversation', {
               'event_category': 'conversation',
               'event_label': intent,
-              'value': ''
             });            
         } else {
           Status.add(
@@ -221,11 +215,37 @@ angular
     }
 
     conversations.submitAnswers = function() {
+      const interation = conversations.data.current.getCurrentInteraction()
+
       conversations.data.current.submitAnswers().then(result => {
         if (result.isSubmitted()) {
+          const conversation = result.getAnsweredConversation()
+
           $scope.$apply(() => {
-            conversations.data.current = result.getAnsweredConversation();
+            conversations.data.current = conversation;
           });
+
+          gtag('event', 'answer conversation', {
+            'event_category': 'conversation',
+            'event_label': `${conversation.getIntent()} - ${
+              JSON.stringify(interation.getAnswers())
+            }`,
+          });    
+
+          if(conversation.canContinue()) {
+            gtag('event', 'interaction prompted', {
+              'event_category': 'conversation',
+              'event_label': `${conversation.getIntent()} - ${
+                conversation.getCurrentInteraction().getPrompt()
+              }`
+            }); 
+ 
+          } else {
+            gtag('event', 'conversation ended', {
+              'event_category': 'conversation',
+              'event_label': `${conversation.getIntent()}`,
+            }); 
+          }
         } else {
           $scope.$apply(() => {
             conversations.data.validationMessage = Object.values(
