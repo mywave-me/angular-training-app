@@ -142,6 +142,22 @@ angular
       handleValidationResult(validationResult);
     };
 
+    conversations.enterDate = function(field, textInput) {
+      conversations.data.validationMessage = "";
+      const [date, month, year] = textInput.split("/");
+      try {
+        const myDate = new MyDate(
+        parseInt(year),
+        parseInt(month),
+        parseInt(date)
+        );
+        const validationResult = field.enter(myDate);
+        handleValidationResult(validationResult);
+      } catch (e) {
+        conversations.data.validationMessage = e.message;
+      }
+    };    
+
     conversations.chooseAnswer = function(field, label) {
       const validationResult = field.choose(label);
 
