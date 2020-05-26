@@ -34,6 +34,17 @@ angular
               Status.add("danger", error.message);
               $rootScope.$apply();
             });
+
+            console.log('START: ', {
+                'event_category': 'conversation',
+                'event_label': intent,
+                'value': ''
+              })
+            gtag('event', 'start', {
+              'event_category': 'conversation',
+              'event_label': intent,
+              'value': ''
+            });            
         } else {
           Status.add(
             "danger",
@@ -223,5 +234,7 @@ angular
           });
         }
       });
+
+
     };
   });
