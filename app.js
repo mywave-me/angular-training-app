@@ -1,3 +1,5 @@
+const GA_MEASUREMENT_ID = 'UA-167528125-2'
+
 angular
   .module("mywaveDemoApp", [])
   .factory("Status", function() {
@@ -23,7 +25,7 @@ angular
         const _this = this;
         const account = mwSdk.getCurrentStoredAccount();
         
-        gtag('config', 'GA_MEASUREMENT_ID', {
+        gtag('config', GA_MEASUREMENT_ID, {
           'user_id': account.getId()
         });
 
