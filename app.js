@@ -29,8 +29,11 @@ angular
           'user_id': account.getId()
         });
 
+
         if (intent) {
 
+          setVirtualPage(`/conversation/${intent}/START`)
+          
           gtag('event', 'conversation:start ', {
             'event_category': `conversation:${intent}`
           });  
@@ -41,6 +44,8 @@ angular
               _this.current = conversation;
               _this.validationMessage = '';
               $rootScope.$apply();
+
+              setVirtualPage(`/conversation/${conversation.getIntent()}/${conversation.getCurrentInteraction().getPrompt()}`)
 
               gtag('event', `interaction:${
                 conversation.getCurrentInteraction().getPrompt()
@@ -255,6 +260,8 @@ angular
           });  
 
           if(conversation.canContinue()) {
+            setVirtualPage(`/conversation/${conversation.getIntent()}/${conversation.getCurrentInteraction().getPrompt()}`)
+
             gtag('event', `interaction:${
               conversation.getCurrentInteraction().getPrompt()
             }`, {
@@ -262,6 +269,8 @@ angular
             }); 
  
           } else {
+            setVirtualPage(`/conversation/${conversation.getIntent()}/END`)
+
             gtag('event', 'conversation:ended', {
               'event_category': `conversation:${conversation.getIntent()}`
             }); 
@@ -278,3 +287,12 @@ angular
 
     };
   });
+
+const setVirtualPage = (title) => {
+  gtag('config', GA_MEASUREMENT_ID, {
+    'page_title' : title,
+    'page_path': kebabCase(title)
+  });
+}
+
+const kebabCase = (string) => string.split(' ').join('-')
