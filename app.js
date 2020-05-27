@@ -23,22 +23,28 @@ angular
         const _this = this;
         const account = mwSdk.getCurrentStoredAccount();
         if (intent) {
+
+          gtag('event', 'conversation:start ', {
+            'event_category': `conversation:${intent}`
+          });  
+
           account
             .startConversation(intent)
             .then(conversation => {
               _this.current = conversation;
               _this.validationMessage = '';
               $rootScope.$apply();
+
+              gtag('event', `interaction:${
+                conversation.getCurrentInteraction().getPrompt()
+              }`, {
+                'event_category': `conversation:${conversation.getIntent()}`
+              }); 
             })
             .catch(error => {
               Status.add("danger", error.message);
               $rootScope.$apply();
-            });
-
-            gtag('event', 'start conversation', {
-              'event_category': 'conversation',
-              'event_label': intent,
-            });            
+            });          
         } else {
           Status.add(
             "danger",
@@ -239,27 +245,18 @@ angular
 
           $scope.$apply(() => {
             conversations.data.current = conversation;
-          });
-
-          gtag('event', 'answer conversation', {
-            'event_category': 'conversation',
-            'event_label': `${conversation.getIntent()} - ${
-              JSON.stringify(interation.getAnswers())
-            }`,
-          });    
+          });  
 
           if(conversation.canContinue()) {
-            gtag('event', 'interaction prompted', {
-              'event_category': 'conversation',
-              'event_label': `${conversation.getIntent()} - ${
-                conversation.getCurrentInteraction().getPrompt()
-              }`
+            gtag('event', `interaction:${
+              conversation.getCurrentInteraction().getPrompt()
+            }`, {
+              'event_category': `conversation:${conversation.getIntent()}`
             }); 
  
           } else {
-            gtag('event', 'conversation ended', {
-              'event_category': 'conversation',
-              'event_label': `${conversation.getIntent()}`,
+            gtag('event', 'conversation:ended', {
+              'event_category': `conversation:${conversation.getIntent()}`
             }); 
           }
         } else {
