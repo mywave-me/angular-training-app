@@ -1,3 +1,5 @@
+const GA_MEASUREMENT_ID = 'UA-167528125-2'
+
 angular
   .module("mywaveDemoApp", [])
   .factory("Status", function() {
@@ -22,18 +24,39 @@ angular
       startConversation: function(intent) {
         const _this = this;
         const account = mwSdk.getCurrentStoredAccount();
+        
+        gtag('config', GA_MEASUREMENT_ID, {
+          'user_id': account.getId()
+        });
+
+
         if (intent) {
+
+          setVirtualPage(`/conversation/${intent}/START`)
+          
+          gtag('event', 'conversation:start ', {
+            'event_category': `conversation:${intent}`
+          });  
+
           account
             .startConversation(intent)
             .then(conversation => {
               _this.current = conversation;
               _this.validationMessage = '';
               $rootScope.$apply();
+
+              setVirtualPage(`/conversation/${conversation.getIntent()}/${conversation.getCurrentInteraction().getPrompt()}`)
+
+              gtag('event', `interaction:${
+                conversation.getCurrentInteraction().getPrompt()
+              }`, {
+                'event_category': `conversation:${conversation.getIntent()}`
+              }); 
             })
             .catch(error => {
               Status.add("danger", error.message);
               $rootScope.$apply();
-            });
+            });          
         } else {
           Status.add(
             "danger",
@@ -137,6 +160,22 @@ angular
       handleValidationResult(validationResult);
     };
 
+    conversations.enterDate = function(field, textInput) {
+      conversations.data.validationMessage = "";
+      const [date, month, year] = textInput.split("/");
+      try {
+        const myDate = new MyDate(
+        parseInt(year),
+        parseInt(month),
+        parseInt(date)
+        );
+        const validationResult = field.enter(myDate);
+        handleValidationResult(validationResult);
+      } catch (e) {
+        conversations.data.validationMessage = e.message;
+      }
+    };    
+
     conversations.chooseAnswer = function(field, label) {
       const validationResult = field.choose(label);
 
@@ -210,11 +249,32 @@ angular
     }
 
     conversations.submitAnswers = function() {
+      const interation = conversations.data.current.getCurrentInteraction()
+
       conversations.data.current.submitAnswers().then(result => {
         if (result.isSubmitted()) {
+          const conversation = result.getAnsweredConversation()
+
           $scope.$apply(() => {
-            conversations.data.current = result.getAnsweredConversation();
-          });
+            conversations.data.current = conversation;
+          });  
+
+          if(conversation.canContinue()) {
+            setVirtualPage(`/conversation/${conversation.getIntent()}/${conversation.getCurrentInteraction().getPrompt()}`)
+
+            gtag('event', `interaction:${
+              conversation.getCurrentInteraction().getPrompt()
+            }`, {
+              'event_category': `conversation:${conversation.getIntent()}`
+            }); 
+ 
+          } else {
+            setVirtualPage(`/conversation/${conversation.getIntent()}/END`)
+
+            gtag('event', 'conversation:ended', {
+              'event_category': `conversation:${conversation.getIntent()}`
+            }); 
+          }
         } else {
           $scope.$apply(() => {
             conversations.data.validationMessage = Object.values(
@@ -223,5 +283,16 @@ angular
           });
         }
       });
+
+
     };
   });
+
+const setVirtualPage = (title) => {
+  gtag('config', GA_MEASUREMENT_ID, {
+    'page_title' : title,
+    'page_path': kebabCase(title)
+  });
+}
+
+const kebabCase = (string) => string.split(' ').join('-')

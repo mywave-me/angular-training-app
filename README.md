@@ -20,3 +20,23 @@ For more information refer to the documentation provided with the training:
    * JS SDK document
    * Training slides
 
+
+
+## Note for Google Analytics
+
+Confirm: Live agent required?
+
+Category - Conversation
+Action - Start, Interaction, Answered, End
+Label (optional, but recommended) - Question / Prompt
+Value (optional) - a non-negative integer that will appear as the event value
+
+
+
+sample
+https://developers.google.com/analytics/devguides/collection/gtagjs/events
+gtag('event', <action>, {
+  'event_category': <category>,
+  'event_label': <label>,
+  'value': <value>
+});

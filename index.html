@@ -128,6 +128,8 @@
             <li
               ng-repeat="interaction in conversationList.data.current.getInteractions()" ng-class="{'text-muted': interaction.isResponded()}"
             >
+
+              
               <label>
                 {{interaction.getPrompt()}}
               </label>
@@ -135,6 +137,7 @@
                 ng-if="!conversationList.data.current.isEnded() && interaction.getId() !== conversationList.data.current.getCurrentInteraction().getId()"
               >
                 <ul ng-repeat="(key, field) in interaction.getFields()">
+
                   <li>{{field.getAnswer()}}</li>
                 </ul>
               </div>
@@ -181,6 +184,25 @@
                         </div>
                       </div>
 
+                    <div
+                      class="card card-body"
+                      ng-if="field.getType() == 'multiSelectChoices'"
+                    >
+                      <div class="form-check">
+                        <p ng-repeat="label in field.getChoices()">
+                          <label>
+                            <input
+                              class="form-check-input"
+                              ng-checked="label === field.getAnswer()"
+                              ng-click="conversationList.selectAnswer(field, label)"
+                              type="radio"
+                            />
+                            {{label}}
+                          </label>
+                        </p>
+                      </div>
+                    </div>                       
+
                       <div class="form-group" ng-if="field.getType() == 'text'">
                         <input
                           id="{{field.getId()}}"
@@ -190,6 +212,16 @@
                           ng-change="{{conversationList.enterText(field, textInput)}}"
                         />
                       </div>
+
+                      <div class="form-group" ng-if="field.getType() == 'date'">
+                        <input
+                          id="{{field.getId()}}"
+                          class="form-control"
+                          ng-model="textInput"
+                          placeholder="{{field.getHint()}}"
+                          ng-change="{{conversationList.enterDate(field, textInput)}}"
+                        />
+                      </div>                      
 
                       <div class="form-group" ng-if="field.getType() == 'number'">
                         <div class="input-group">
@@ -232,6 +264,10 @@
                             <td>
                               <h4>{{choice.title}}</h4>
                               <div>{{choice.description}}</div>
+                              <p>{{choice.price}}</p>
+                            </td>
+                            <td>
+                              <img src="{{choice.imageUrl}}" alt="{{choice.userFriendlyLabel}}" />
                             </td>
                           </tr>
                         </table>
@@ -294,5 +330,14 @@
         </div>
       </div>
     </div>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-167528125-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-167528125-2');
+    </script>
   </body>
 </html>
