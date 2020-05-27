@@ -22,6 +22,11 @@ angular
       startConversation: function(intent) {
         const _this = this;
         const account = mwSdk.getCurrentStoredAccount();
+        
+        gtag('config', 'GA_MEASUREMENT_ID', {
+          'user_id': account.getId()
+        });
+
         if (intent) {
 
           gtag('event', 'conversation:start ', {
